@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "127770465722",
+    "firebase_url": "https://savebluedragon.firebaseio.com",
+    "project_id": "savebluedragon",
+    "storage_bucket": "savebluedragon.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:127770465722:android:72ad92012ebfa969e97983",
+        "android_client_info": {
+          "package_name": "vn.techlifegroup.thanhlong"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "127770465722-fttt9sv2mu2pt10sn8gi4kmdt8p3hb57.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEgIgNsZ41wdquxR5jMyJivU6Jb46dMFA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "127770465722-fttt9sv2mu2pt10sn8gi4kmdt8p3hb57.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
