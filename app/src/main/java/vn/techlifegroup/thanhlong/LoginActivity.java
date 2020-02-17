@@ -132,9 +132,9 @@ public class LoginActivity extends AppCompatActivity {
             }
         };
 
-        final EditText edtPhone = findViewById(R.id.edt_login_phone_number);
+        final EditText edtPhone = findViewById(R.id.edt_phone_user);
 
-        Button btnLogin = (Button)findViewById(R.id.btn_login_signin);
+        Button btnLogin = (Button)findViewById(R.id.btn_ok);
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -224,6 +224,8 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Intent it = new Intent(getApplicationContext(),MainActivity.class);
                             it.putExtra("ReferrerlUser", referrerUid);
+                            it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
                             startActivity(it);
                         }
                     }
