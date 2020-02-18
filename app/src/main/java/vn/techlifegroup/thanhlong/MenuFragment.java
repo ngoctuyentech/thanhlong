@@ -1,19 +1,37 @@
 package vn.techlifegroup.thanhlong;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+
+import vn.techlifegroup.thanhlong.model.UserModel;
 import vn.techlifegroup.thanhlong.ui.menufragment2.MenuFragment2;
 
+import static vn.techlifegroup.thanhlong.MainActivity.userUid;
 import static vn.techlifegroup.thanhlong.utils.Constants.buttonClick;
+import static vn.techlifegroup.thanhlong.utils.Constants.refDatabase;
 
 public class MenuFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -26,6 +44,9 @@ public class MenuFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    public static String userUid = FirebaseAuth.getInstance().getUid();
+    private String userPhone = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
 
     public MenuFragment() {
         // Required empty public constructor
@@ -66,7 +87,8 @@ public class MenuFragment extends Fragment {
 
         View menu = inflater.inflate(R.layout.menu_fragment, container, false);
         final ImageView ivAccount = menu.findViewById(R.id.iv_menu_account);
-        final ImageView ivTxList = menu.findViewById(R.id.iv_tx_list);
+        final ImageView ivTxList  = menu.findViewById(R.id.iv_tx_list);
+        final ImageView ivCall    = menu.findViewById(R.id.iv_call);
 
         ivTxList.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,7 +97,7 @@ public class MenuFragment extends Fragment {
                 //viewTransaction();
             }
         });
-/*
+
         ivAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,7 +118,7 @@ public class MenuFragment extends Fragment {
                                 return true;
 
                             case R.id.profile:
-                                dialogProfile();
+                                dialogAddProfile();
                                 return true;
 
                             default:
@@ -109,11 +131,97 @@ public class MenuFragment extends Fragment {
             }
         }); //closing the setOnClickListene
 
- */
-//ivAccount
+        ivCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refDatabase.child("1-System/adminContact").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        String phone = dataSnapshot.getValue().toString();
+                        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", phone, null));
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+            }
+        });
+
+
+
 
         return menu;
     }
+
+    private void dialogAddProfile(){
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        final View dialogView = inflater.inflate(R.layout.dialog_add_profile, null);
+        builder.setView(dialogView);
+
+        final Dialog dialog = builder.create();
+        dialog.show();
+
+        final EditText edtName     = dialogView.findViewById(R.id.edt_name_user);
+        final EditText edtCmnd     = dialogView.findViewById(R.id.edt_cmnd_user);
+        final EditText edtPhone    = dialogView.findViewById(R.id.edt_phone_user);
+        final EditText edtAdddress = dialogView.findViewById(R.id.edt_address_user);
+
+        edtPhone.setText(userPhone);
+
+        final Button btnOk = dialogView.findViewById(R.id.btn_ok);
+
+        btnOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                v.startAnimation(buttonClick);
+
+                final String userPhone   = edtPhone.getText().toString();
+
+                final String userName    = edtName.getText().toString();
+                final String userCmnd    = edtCmnd.getText().toString();
+                final String userAddress = edtAdddress.getText().toString();
+
+                if(TextUtils.isEmpty(userPhone)){
+                    Toast.makeText(getActivity(),"Vui lòng nhập số điện thoại",Toast.LENGTH_LONG).show();
+
+                }if(TextUtils.isEmpty(userName)){
+                    Toast.makeText(getActivity(),"Vui lòng nhập Họ và tên",Toast.LENGTH_LONG).show();
+
+                }if(TextUtils.isEmpty(userCmnd)){
+                    Toast.makeText(getActivity(),"Vui lòng nhập CMND",Toast.LENGTH_LONG).show();
+
+                }if(TextUtils.isEmpty(userAddress)){
+                    Toast.makeText(getActivity(),"Vui lòng nhập địa chỉ",Toast.LENGTH_LONG).show();
+
+                }else {
+
+                    UserModel userModel = new UserModel(userName, userCmnd, userPhone, userAddress);
+                    refDatabase.child("Profile").child(userUid).setValue(userModel).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            dialog.dismiss();
+                            Toast.makeText(getActivity(), "Cập nhật hồ sơ thành công", Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+
+
+
+
+                }
+            }
+        });
+
+
+    }
+
 /*
     private void dialogProfile() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -182,6 +290,11 @@ public class MenuFragment extends Fragment {
         });
     }
 
+ */
+//dialogProfile t3g
+
+
+/*
     private void viewTransaction() {
         final List<TransactionModel> transactions = new ArrayList<>();
 
@@ -402,7 +515,7 @@ public class MenuFragment extends Fragment {
 
  */
 
-//dialogProfile, viewTransaction
+//viewTransaction
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {

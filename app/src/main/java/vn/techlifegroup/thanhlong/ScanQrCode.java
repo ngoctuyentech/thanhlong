@@ -91,15 +91,15 @@ public class ScanQrCode extends AppCompatActivity implements ZXingScannerView.Re
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                                if(dataSnapshot.hasChildren()){
+                                //if (dataSnapshot.hasChildren()) {
                                     QrCodeModel qrCode = dataSnapshot.getValue(QrCodeModel.class);
-                                    String codeType = qrCode.getCodeType();
+                                    //String codeType = qrCode.getCodeType();
 
-
+/*
                                     if(codeType.equals("Theo sản phẩm")){
                                         String productName = qrCode.getProductName();
                                         final String discountRate = qrCode.getDisCountRate();
-/*
+
                                         Constants.refProductList.child(productName).child("productPrice").addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -119,23 +119,23 @@ public class ScanQrCode extends AppCompatActivity implements ZXingScannerView.Re
                                         });
  */
 //Theo sản phẩm
+                                    final String cashValue = qrCode.getCashValue();
 
-                                    }else{
-                                        final String cashValue = qrCode.getCashValue();
-                                        Intent it = new Intent(getApplicationContext(),MainActivity.class);
-                                        it.putExtra("CashAdded", cashValue);
-                                        it.putExtra("CodeKey", key);
-                                        it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                    //Toast.makeText(getApplicationContext(), cashValue, Toast.LENGTH_LONG).show();
 
-                                        updateQrCode();
+                                    Intent it = new Intent(getApplicationContext(), MainActivity.class);
+                                    it.putExtra("CashAdded", cashValue);
+                                    it.putExtra("CodeKey", key);
+                                    //it.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                    it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-                                        startActivity(it);
+                                    updateQrCode();
 
-                                    }
-                                }
+                                    startActivity(it);
+
+
 
                             }
-
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
 
@@ -173,7 +173,11 @@ public class ScanQrCode extends AppCompatActivity implements ZXingScannerView.Re
 
     @Override
     public void onBackPressed() {
-        mScannerView.stopCamera();          // Stop camera on pause
+        mScannerView.stopCamera();
+        // Stop camera on pause
+
+        startActivity(new Intent(getApplicationContext(),MainActivity.class));
+
 
         super.onBackPressed();
     }

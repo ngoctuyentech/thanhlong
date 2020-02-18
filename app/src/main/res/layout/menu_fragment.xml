@@ -30,6 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:visibility="gone"
             app:srcCompat="@drawable/icon_history" />
 
         <ImageView
@@ -47,7 +48,7 @@
             app:srcCompat="@drawable/icon_acc" />
 
         <ImageView
-            android:id="@+id/imageView18"
+            android:id="@+id/iv_call"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -80,7 +81,8 @@
             android:layout_weight="1"
             android:gravity="center"
 
-            android:text="Giao dịch" />
+            android:text="Giao dịch"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/textView19"

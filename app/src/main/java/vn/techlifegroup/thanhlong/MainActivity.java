@@ -42,7 +42,9 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
 
     private String cashAdded,codeKey;
 
-    private String totalUserPoint;
+    private String totalUserPoint, totalPoint;
+
+    private TextView tvPointUser;
 
 
     @Override
@@ -55,22 +57,24 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
         cashAdded = it.getStringExtra("CashAdded");
         codeKey = it.getStringExtra("CodeKey");
 
-        final TextView tvPoint = findViewById(R.id.tv_point_cash);
+        //Toast.makeText(getApplicationContext(), cashAdded+"", Toast.LENGTH_LONG).show();
 
-        refDatabase.child("TotalPoint").addValueEventListener(new ValueEventListener() {
+        tvPointUser = findViewById(R.id.tv_point_cash);
+        final TextView tvPointAll  = findViewById(R.id.tv_point_cash_all);
+
+
+        refDatabase.child("UserPoint").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 if(dataSnapshot.hasChild(userUid)){
-                    refDatabase.child("TotalPoint").child(userUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                    refDatabase.child("UserPoint").child(userUid).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
 
-                            final PointModel pointModel = dataSnapshot.getValue(PointModel.class);
+                            String totalUserPoint = dataSnapshot.getValue()+"";
 
-                            totalUserPoint = pointModel.getTotalUserPoint();
-
-                            tvPoint.setText(Utils.convertNumber(totalUserPoint));
+                            tvPointUser.setText(Utils.convertNumber(totalUserPoint));
 
                         }
 
@@ -81,6 +85,22 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
                     });
 
                 }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        refDatabase.child("1-System/totalPointAllUser").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                String totalPoint = dataSnapshot.getValue()+"";
+
+                tvPointAll.setText(Utils.convertNumber(totalPoint));
 
             }
 
@@ -103,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
 
             }
         });
-
+/*
         btnWithdrawal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -111,6 +131,10 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
 
             }
         });
+
+ */
+//btnWithdrawal
+
 
 /*
         if((referrerUser != null) && (!referrerUser.equals(userUid))){
@@ -216,6 +240,8 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
                 public void onClick(DialogInterface dialog, int which) {
                     //scanToPoint();
                     addPoint();
+
+                    cashAdded = null;
                 }
             }).show();
         }
@@ -232,25 +258,21 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
 
         final long addPoint = Long.parseLong(cashAdded);
 
-        String keyPointPush = refDatabase.child("UserPoint").child(userUid).push().getKey();
-
-        refDatabase.child("UserPoint").child(userUid).child(keyPointPush).setValue(addPoint+"");
-
-        refDatabase.child("TotalPoint").addListenerForSingleValueEvent(new ValueEventListener() {
+        refDatabase.child("UserPoint").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChild(userUid)){
 
-                    refDatabase.child("TotalPoint").child(userUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                    refDatabase.child("UserPoint").child(userUid).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
 
-                            final PointModel pointModel = dataSnapshot.getValue(PointModel.class);
-
-                            long oldPoint = Long.parseLong(pointModel.getTotalUserPoint());
+                            long oldPoint = Long.parseLong(dataSnapshot.getValue()+"");
                             long newPoint = oldPoint + addPoint;
 
-                            refDatabase.child("TotalPoint").child(userUid).child("totalUserPoint").setValue(newPoint+"");
+                            refDatabase.child("UserPoint").child(userUid).setValue(newPoint+"");
+                            tvPointUser.setText(newPoint+"");
+
 
                         }
 
@@ -259,8 +281,64 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
 
                         }
                     });
+
+                    refDatabase.child("1-System").child("totalPointAllUser").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+
+                            long oldPoint = Long.parseLong(dataSnapshot.getValue()+"");
+                            long newPoint = oldPoint + addPoint;
+
+                            refDatabase.child("1-System/totalPointAllUser").setValue(newPoint+"");
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
                 }else {
-                    refDatabase.child("TotalPoint").child(userUid).child("totalUserPoint").setValue(addPoint+"");
+
+                    tvPointUser.setText(addPoint+"");
+
+                    refDatabase.child("UserPoint").child(userUid).setValue(addPoint+"");
+
+                    refDatabase.child("1-System").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.hasChild("totalPointAllUser")) {
+
+                                refDatabase.child("1-System").child("totalPointAllUser")
+                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                        long oldPoint = Long.parseLong(dataSnapshot.getValue()+"");
+                                        long newPoint = oldPoint + addPoint;
+
+                                        refDatabase.child("1-System/totalPointAllUser").setValue(newPoint+"");
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+
+                            }else {
+                                refDatabase.child("1-System/totalPointAllUser").setValue(addPoint+"");
+
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
 
                 }
             }
@@ -272,6 +350,16 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
         });
     }
 
+    @Override
+    public void onBackPressed() {
+
+        //startActivity(new Intent(getApplicationContext(),MainActivity.class));
+
+
+        super.onBackPressed();
+    }
+
+/*
     private void withdrawal(){
 
         refDatabase.child("Profile").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -309,6 +397,9 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
         });
 
     }
+
+ */
+//withdrawal
 
     private void withdrawCash() {
 
@@ -401,7 +492,7 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
         }
     }
 
-
+/*
     private void dialogAddProfile(){
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -461,4 +552,7 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
 
 
     }
+
+ */
+//dialogAddProfile
 }
