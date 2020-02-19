@@ -19,7 +19,7 @@ public class UserModel {
         this.userAddress = userAddress;
     }
 
-    public String getNameUser() {
+    public String getUserName() {
         return userName;
     }
 
@@ -27,7 +27,7 @@ public class UserModel {
         return userCmnd;
     }
 
-    public String getPhoneUser() {
+    public String getUserPhone() {
         return userPhone;
     }
 

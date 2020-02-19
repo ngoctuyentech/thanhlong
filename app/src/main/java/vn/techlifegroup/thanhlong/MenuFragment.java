@@ -1,7 +1,5 @@
 package vn.techlifegroup.thanhlong;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import android.app.Dialog;
@@ -18,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -27,9 +26,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import vn.techlifegroup.thanhlong.model.UserModel;
-import vn.techlifegroup.thanhlong.ui.menufragment2.MenuFragment2;
 
-import static vn.techlifegroup.thanhlong.MainActivity.userUid;
 import static vn.techlifegroup.thanhlong.utils.Constants.buttonClick;
 import static vn.techlifegroup.thanhlong.utils.Constants.refDatabase;
 
@@ -46,7 +43,9 @@ public class MenuFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     public static String userUid = FirebaseAuth.getInstance().getUid();
-    private String userPhone = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
+    private String userPhoneGet = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
+    private String userPhone    =  "0"+(userPhoneGet.substring(3));
+
 
     public MenuFragment() {
         // Required empty public constructor
@@ -159,6 +158,7 @@ public class MenuFragment extends Fragment {
 
     private void dialogAddProfile(){
 
+        /*
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         final View dialogView = inflater.inflate(R.layout.dialog_add_profile, null);
@@ -167,12 +167,19 @@ public class MenuFragment extends Fragment {
         final Dialog dialog = builder.create();
         dialog.show();
 
+         */
+        //dialod old
+
+        final Dialog dialogView = new Dialog(getActivity(), R.style.FullWidth_Dialog);
+        dialogView.setContentView(R.layout.dialog_add_profile);
+        dialogView.show();
+
         final EditText edtName     = dialogView.findViewById(R.id.edt_name_user);
         final EditText edtCmnd     = dialogView.findViewById(R.id.edt_cmnd_user);
-        final EditText edtPhone    = dialogView.findViewById(R.id.edt_phone_user);
+        final TextView tvPhone     = dialogView.findViewById(R.id.tv_phone_user);
         final EditText edtAdddress = dialogView.findViewById(R.id.edt_address_user);
 
-        edtPhone.setText(userPhone);
+        tvPhone.setText(userPhone);
 
         final Button btnOk = dialogView.findViewById(R.id.btn_ok);
 
@@ -182,16 +189,13 @@ public class MenuFragment extends Fragment {
 
                 v.startAnimation(buttonClick);
 
-                final String userPhone   = edtPhone.getText().toString();
+                //final String userPhone   = edtPhone.getText().toString();
 
                 final String userName    = edtName.getText().toString();
                 final String userCmnd    = edtCmnd.getText().toString();
                 final String userAddress = edtAdddress.getText().toString();
 
-                if(TextUtils.isEmpty(userPhone)){
-                    Toast.makeText(getActivity(),"Vui lòng nhập số điện thoại",Toast.LENGTH_LONG).show();
-
-                }if(TextUtils.isEmpty(userName)){
+                if(TextUtils.isEmpty(userName)){
                     Toast.makeText(getActivity(),"Vui lòng nhập Họ và tên",Toast.LENGTH_LONG).show();
 
                 }if(TextUtils.isEmpty(userCmnd)){
@@ -206,16 +210,49 @@ public class MenuFragment extends Fragment {
                     refDatabase.child("Profile").child(userUid).setValue(userModel).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            dialog.dismiss();
+                            dialogView.dismiss();
                             Toast.makeText(getActivity(), "Cập nhật hồ sơ thành công", Toast.LENGTH_SHORT).show();
 
                         }
                     });
 
+                }
+            }
+        });
 
+        refDatabase.child("Profile").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChild(userUid)){
 
+                    refDatabase.child("Profile").child(userUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+
+                            UserModel userModel = dataSnapshot.getValue(UserModel.class);
+
+                            String userName    = userModel.getUserName();
+                            String userCmnd    = userModel.getUserCmnd();
+                            String userAddress = userModel.getUserAddress();
+
+                            edtName.setText(userName);
+                            edtCmnd.setText(userCmnd);
+                            edtAdddress.setText(userAddress);
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
 
                 }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
 

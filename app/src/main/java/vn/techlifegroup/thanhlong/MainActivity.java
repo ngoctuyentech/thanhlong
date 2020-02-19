@@ -12,6 +12,10 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -31,6 +35,7 @@ import vn.techlifegroup.thanhlong.utils.Utils;
 
 import static vn.techlifegroup.thanhlong.utils.Constants.buttonClick;
 import static vn.techlifegroup.thanhlong.utils.Constants.refDatabase;
+import static vn.techlifegroup.thanhlong.utils.Utils.convertNumber;
 
 public class MainActivity extends AppCompatActivity implements MenuFragment.OnFragmentInteractionListener {
 
@@ -38,13 +43,11 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
 
     private String userPhone = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
 
-    private String referrerUser;
-
     private String cashAdded,codeKey;
 
-    private String totalUserPoint, totalPoint;
-
     private TextView tvPointUser;
+
+
 
 
     @Override
@@ -52,16 +55,55 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         Intent it = this.getIntent();
         cashAdded = it.getStringExtra("CashAdded");
         codeKey = it.getStringExtra("CodeKey");
 
+        //clockwise();
+        //zoom(View);
+
+        final ImageView image = (ImageView)findViewById(R.id.splash);
+
+        Animation clockwise = AnimationUtils.loadAnimation(getApplicationContext(),
+        R.anim.clockwise);
+        clockwise.setRepeatCount(Animation.INFINITE);
+        image.startAnimation(clockwise);
+
+        image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                v.startAnimation(buttonClick);
+
+                Animation zoom = AnimationUtils.loadAnimation(getApplicationContext(),
+                        R.anim.zoom);
+                image.startAnimation(zoom);
+
+                startActivity(new Intent(getApplicationContext(),ScanQrCode.class));
+
+            }
+        });
+
+
+
+
+
         //Toast.makeText(getApplicationContext(), cashAdded+"", Toast.LENGTH_LONG).show();
+
+        RotateAnimation anim = new RotateAnimation(0f, 360f, 617f, 617f);
+        anim.setInterpolator(new LinearInterpolator());
+        anim.setRepeatCount(Animation.INFINITE);
+        anim.setDuration(2000);
+
+// Start animating the image
+        //final ImageView splash = (ImageView) findViewById(R.id.splash);
+        //splash.startAnimation(anim);
+
+// Later.. stop the animation
+
 
         tvPointUser = findViewById(R.id.tv_point_cash);
         final TextView tvPointAll  = findViewById(R.id.tv_point_cash_all);
-
 
         refDatabase.child("UserPoint").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -74,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
 
                             String totalUserPoint = dataSnapshot.getValue()+"";
 
-                            tvPointUser.setText(Utils.convertNumber(totalUserPoint));
+                            tvPointUser.setText(convertNumber(totalUserPoint));
 
                         }
 
@@ -83,9 +125,7 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
 
                         }
                     });
-
                 }
-
             }
 
             @Override
@@ -100,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
 
                 String totalPoint = dataSnapshot.getValue()+"";
 
-                tvPointAll.setText(Utils.convertNumber(totalPoint));
+                tvPointAll.setText(convertNumber(totalPoint));
 
             }
 
@@ -110,19 +150,10 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
             }
         });
 
-        Button btnScan       = findViewById(R.id.btn_scan);
+        //Button btnScan       = findViewById(R.id.btn_scan);
         Button btnWithdrawal = findViewById(R.id.btn_withdrawal);
 
 
-        btnScan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                v.startAnimation(buttonClick);
-                startActivity(new Intent(getApplicationContext(),ScanQrCode.class));
-
-            }
-        });
 /*
         btnWithdrawal.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -230,10 +261,13 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
     @Override
     protected void onResume() {
 
+
+
+
         if(cashAdded != null){
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setCancelable(false);
-            builder.setMessage("Xin chúc mừng, Quý khách được tăng tích luỹ thêm " + Utils.convertNumber(cashAdded) + " đ. Vui lòng bấm Đồng ý để xác nhận!");
+            builder.setMessage("Xin chúc mừng, Quý khách được tăng tích luỹ thêm " + convertNumber(cashAdded) + " đ. Vui lòng bấm Đồng ý để xác nhận!");
 
             builder.setPositiveButton("Đồng ý", new DialogInterface.OnClickListener() {
                 @Override
@@ -247,6 +281,20 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
         }
 
         super.onResume();
+    }
+
+    public void clockwise(View view){
+        ImageView image = (ImageView)findViewById(R.id.splash);
+        Animation animation = AnimationUtils.loadAnimation(getApplicationContext(),
+                R.anim.clockwise);
+        image.startAnimation(animation);
+    }
+
+    public void zoom(View view){
+        ImageView image = (ImageView)findViewById(R.id.splash);
+        Animation animation1 = AnimationUtils.loadAnimation(getApplicationContext(),
+                R.anim.zoom);
+        image.startAnimation(animation1);
     }
 
     @Override
@@ -271,8 +319,7 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
                             long newPoint = oldPoint + addPoint;
 
                             refDatabase.child("UserPoint").child(userUid).setValue(newPoint+"");
-                            tvPointUser.setText(newPoint+"");
-
+                            tvPointUser.setText(convertNumber(newPoint+""));
 
                         }
 
@@ -301,7 +348,7 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
 
                 }else {
 
-                    tvPointUser.setText(addPoint+"");
+                    tvPointUser.setText(convertNumber(addPoint+""));
 
                     refDatabase.child("UserPoint").child(userUid).setValue(addPoint+"");
 
@@ -400,7 +447,7 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
 
  */
 //withdrawal
-
+/*
     private void withdrawCash() {
 
         final long userBalance = Long.parseLong(totalUserPoint);
@@ -491,6 +538,9 @@ public class MainActivity extends AppCompatActivity implements MenuFragment.OnFr
 
         }
     }
+
+ */
+//withdrawCash
 
 /*
     private void dialogAddProfile(){

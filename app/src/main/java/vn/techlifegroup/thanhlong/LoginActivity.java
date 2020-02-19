@@ -132,7 +132,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         };
 
-        final EditText edtPhone = findViewById(R.id.edt_phone_user);
+        final EditText edtPhone = findViewById(R.id.tv_phone_user);
 
         Button btnLogin = (Button)findViewById(R.id.btn_ok);
         btnLogin.setOnClickListener(new View.OnClickListener() {
@@ -145,12 +145,18 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(),"Vui lòng nhập số điện thoại",Toast.LENGTH_LONG).show();
                 }else{
                     startPhoneNumberVerification(phoneNumber);
-
+/*
                     AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                     View dialogView = getLayoutInflater().inflate(R.layout.dialog_enter_code,null);
                     builder.setView(dialogView);
                     final Dialog dialog2 = builder.create();
                     dialog2.show();
+
+ */
+//dialogView old
+                    final Dialog dialogView = new Dialog(LoginActivity.this, R.style.FullWidth_Dialog);
+                    dialogView.setContentView(R.layout.dialog_enter_code);
+                    dialogView.show();
 
                     final EditText edtCodeInput = (EditText)dialogView.findViewById(R.id.edt_enter_code_number);
                     Button btnCodeOk = (Button)dialogView.findViewById(R.id.btn_enter_code_ok);

@@ -859,16 +859,6 @@ public class Utils {
     }
 
     //@RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public static boolean pageRangesContainPage(int pageNumber, PageRange[] ranges)
-    {
-        for(PageRange range : ranges) {
-            if(pageNumber >= range.getStart() && pageNumber <= range.getEnd()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 
     public static void createFile(final String outputFile,
                                   final Context context, final Integer[] inputRawResources)
